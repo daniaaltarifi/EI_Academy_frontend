@@ -1,0 +1,129 @@
+/* QUESTION BANK PAGE */
+.number_slide_questionbank {
+  text-align: center;
+  margin-top: 5px;
+  font-size: 18px;
+}
+.space_between_numslide {
+  font-weight: bold;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+/* QUESTION DETAILS PAGE  */
+.unit-container {
+  background-color: #f5f5f5;
+  border-radius: 10px;
+  margin: 2vh 0;
+}
+.title_unit {
+  color: #018abe;
+  font-weight: bold;
+}
+.topic-section {
+  cursor: pointer;
+  background-color: #fff;
+  border-radius: 10px;
+  margin: 1vh 0;
+  transition: all 0.3s ease-in-out;
+}
+.training_cont {
+  display: flex;
+}
+.link_to_testbank {
+  color: #000;
+  text-decoration: none;
+}
+.show_video_btn {
+  background-color: #018abe;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 20px;
+  border: none;
+  height: 36px;
+  width: 100px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+.cont_files_and_paper {
+  background-color: #fff;
+  border-radius: 10px;
+  margin: 1vh;
+  list-style-type: none;
+}
+/* TEST BANK PAGE */
+.answers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.option {
+  padding: 15px;
+  border-radius: 5px;
+  transition: all 0.3s ease-in-out;
+}
+
+.correct {
+  border: 2px solid green;
+  box-shadow: 0px 10px 37px -12px green;
+}
+
+.incorrect {
+  border: 2px solid red;
+  box-shadow: 0px 10px 37px -12px rgba(230, 28, 28, 1);
+}
+/* QUIZ PAGE */
+.score-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+}
+.score_result {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20vh;
+  width: 20vh;
+  box-shadow: 0px 10px 47px -12px green;
+  border-radius: 60px;
+}
+.text_score {
+  font-size: 50px;
+  font-weight: bold;
+  text-align: center;
+}
+.correct_wrong_answer {
+    background-color:#d6e7ee;
+    height: 25vh;
+    width: 35vh;
+    display: flex;
+    flex-direction: column; /* Change from column to row */
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    font-weight: bold;
+    gap: 5px;
+    margin: 20px;
+}
+
+.correct_wrong_answer hr {
+    width: 100%;  /* Ensures the line spans the full width */
+    height: 2px;  /* Adjust thickness */
+    background-color: black;  /* Change color if needed */
+    border: none;  /* Remove default styling */
+    margin: 10px 0;  /* Add spacing */
+}
+
+@media screen and (max-width: 768px) {
+  .show_video_btn {
+    height: 30px;
+    width: 70px;
+  }
+  .training_cont .form-select,
+  .training_cont .form-control,
+  .training_cont .input-group-text {
+    width: 100% !important;
+  }
+}

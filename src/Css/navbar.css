@@ -1,0 +1,87 @@
+body{
+  font-family: "Cairo", sans-serif;
+  /* font-family: Arial, Helvetica, sans-serif; */
+  /* font-family: "Noto Sans", "Ubuntu", sans-serif; */
+  font-display: swap;
+
+}
+
+/* Default styles (for larger screens) */
+.navbar-nav {
+  direction: rtl; /* Ensures RTL layout */
+}
+.purple_btn {
+  background-color: #018abe;
+  color: #fcd392;
+  font-weight: bold;
+  border-radius: 15px;
+  margin-left: 5px;
+}
+.purple_btn:hover{
+  background-color: #97cadb;
+}
+.text_navbar {
+  color: #018abe;
+  font-size: 19px;
+
+}
+.text_navbar:hover {
+  font-weight: bold;
+  color: #018abe;
+  text-decoration: underline;
+}
+.logo_container {
+  width: 150px;
+}
+.logo_size {
+  max-width: 100%; 
+  height: 80px; 
+  width: 100%;
+  object-fit: cover;
+}
+
+
+.img_icon_navbar{
+  width: 30px;
+  object-fit: contain;
+}
+.list_profile_icon_navbar{
+  font-size: 15px;
+  font-weight: 600;
+ padding-top: 2vh;
+}
+.icon_profile_navbar{
+  display: flex;
+}
+@media screen and (max-width: 992px) {
+    .text_navbar {
+      font-size: 18px;
+    }
+    .logo_container {
+      width: 15%;
+    }
+  }
+@media screen and (max-width:600px) {
+  .text_navbar {
+    font-size: 16px;
+  }
+  .logo_container {
+    width: 35%;
+  }
+}
+
+/* For collapsed menu on smaller screens */
+@media (max-width: 991.98px) { /* Bootstrap lg breakpoint */
+  .navbar-collapse {
+    direction: rtl;
+    text-align: left;
+  }
+  
+  .navbar-nav {
+    flex-direction: column; 
+  }
+
+  .navbar-nav .nav-item {
+    text-align: right; 
+  }
+}
