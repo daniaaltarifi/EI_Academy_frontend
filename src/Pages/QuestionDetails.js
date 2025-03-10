@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 import "../Css/courseDetails.css";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import Tabs from "../Pages/Tabs.js";
 import Tab from "../Pages/Tab.js";
 import { IoIosArrowDown } from "react-icons/io";
@@ -19,9 +19,11 @@ import VideoModel from "../components/VideoModel.js";
 import courseimg from "../assets/course.webp";
 import defaultvideo from "../assets/Introduction to Online Courses.mp4";
 import InputGroup from "react-bootstrap/InputGroup";
+import { Alert } from "react-bootstrap";
 
 function QuestionDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [courseDetails, setCourseDetails] = useState([]);
   const [videosData, setVideosData] = useState([]);
   const [courseId, setcourseId] = useState(null);
@@ -44,9 +46,15 @@ function QuestionDetails() {
   const [smShow, setSmShow] = useState(false);
   const [course_users, setCourse_users] = useState([]);
   const [approvedUser, setApprovedUser] = useState(null);
-// NEW EI ACADEMY
-const [numberOfQuestion, setNumberOfQuestion] = useState("");
-const isValid=numberOfQuestion > 0
+  // NEW EI ACADEMY
+  const [numberOfQuestion, setNumberOfQuestion] = useState("");
+  const [topics, setTopics] = useState([]);
+  const [trainingData, setTrainingData] = useState({
+    topic_id: "",
+    questionCount: "",
+    questionType: "",
+  });
+  const isValid = numberOfQuestion > 0;
   const title_popup = "تسجيل الدخول";
   const description_popup = "لشراء قسم يجب تسجيل الدخول";
   const title_popup_confirm = " تنبيه";
@@ -55,6 +63,7 @@ const isValid=numberOfQuestion > 0
   useEffect(() => {
     window.scrollTo(0, 0);
     fetchCourseDetails();
+    fetchTopicByTestbankId();
   }, []);
 
   const [expandedItemId, setExpandedItemId] = useState(null);
@@ -72,6 +81,17 @@ const isValid=numberOfQuestion > 0
       }
     } catch (error) {
       console.error("Error fetching course details:", error);
+    }
+  };
+  // GET TOPICS BY TESTBANK ID
+  const fetchTopicByTestbankId = async () => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/testbank/getTopicsByTestBankId/${id}`
+      );
+      setTopics(response.data);
+    } catch (error) {
+      console.error("Error fetching topics by testbank ID:", error);
     }
   };
   const handleClose = () => {
@@ -227,7 +247,29 @@ const isValid=numberOfQuestion > 0
     setVideoUrl("https://www.youtube.com/embed/dQw4w9WgXcQ"); // Example video URL
     setShowPopupVideo(true);
   };
+  const handleChangeTrainigData = (e) => {
+    const { name, value } = e.target;
+    setTrainingData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    console.log("training data", trainingData);
+  };
+  const startTraining = () => {
+    if (
+      !trainingData.topic_id ||
+      !trainingData.questionCount ||
+      !trainingData.questionType
+    ) {
+      // alert("يرجى إدخال جميع البيانات");
+      setMessage('يرجى إدخال جميع البيانات')
+      return;
+    }
 
+    navigate(
+      `/testbank/${trainingData.topic_id}/${trainingData.questionCount}/${trainingData.questionType}`
+    );
+  };
   return (
     <>
       {/* header of course details */}
@@ -255,7 +297,10 @@ const isValid=numberOfQuestion > 0
                     class="fa-solid fa-graduation-cap card_icon"
                     style={{ color: "#f8c36e" }}
                   ></i>
-                  <p className="details_courses_card" style={{color:"#f8c36e",fontWeight:"bold"}}>
+                  <p
+                    className="details_courses_card"
+                    style={{ color: "#f8c36e", fontWeight: "bold" }}
+                  >
                     الفصل {course.semester}
                   </p>
                 </div>
@@ -264,7 +309,10 @@ const isValid=numberOfQuestion > 0
                     class="fa-solid fa-file card_icon"
                     style={{ color: "#f8c36e" }}
                   ></i>
-                  <p className="details_courses_card "style={{color:"#f8c36e",fontWeight:"bold"}}>
+                  <p
+                    className="details_courses_card "
+                    style={{ color: "#f8c36e", fontWeight: "bold" }}
+                  >
                     عدد المواضيع :
                     {course.Units?.reduce(
                       (total, unit) => total + (unit.Topics?.length || 0),
@@ -532,17 +580,15 @@ const isValid=numberOfQuestion > 0
                       <p className="description_coursedetails">
                         {course.descr}
                       </p>
-                      <div className="container text-center">
+                      {/* <div className="container text-center">
                         {courseDetails.map((item) =>
                           item.Units?.map((unit, unitIndex) => (
                             <div key={unit.id} className="unit-container p-4">
                               <h5 className="title_unit">
                                 الوحدة {unit.unit_name}
                               </h5>
-                              {/* Display Topics inside the Unit */}
                               {unit.Topics?.map((topic, topicIndex) => (
                                 <div key={topic.id} className="topic-container">
-                                  {/* Topic Title & Expandable Section */}
                                   <div
                                     className="topic-section p-3"
                                     onClick={() => handleClick(topic.id)}
@@ -555,11 +601,8 @@ const isValid=numberOfQuestion > 0
                                         الموضوع {topicIndex + 1}
                                       </h6>
                                     </div>
-
-                                    {/* Show Details when Expanded INSIDE the same background */}
                                     {expandedItemId === topic.id && (
                                       <div className="mt-3">
-                                        {/* Topic Name & Buttons */}
                                         <div className="d-flex flex-wrap justify-content-between align-items-center">
                                           <Link
                                             to={`/testbank/${topic.id}`}
@@ -579,7 +622,6 @@ const isValid=numberOfQuestion > 0
                                           </Link>
 
                                           <div className="d-flex">
-                                            {/* Video Button */}
                                             <button
                                               className="show_video_btn"
                                               onClick={() =>
@@ -592,7 +634,6 @@ const isValid=numberOfQuestion > 0
                                                 style={{ color: "#fff" }}
                                               ></i>
                                             </button>
-                                            {/* Explanation Button */}
                                             <Link
                                               to={`/explanation/${topic.id}`}
                                             >
@@ -611,8 +652,6 @@ const isValid=numberOfQuestion > 0
                                             </Link>
                                           </div>
                                         </div>
-
-                                        {/* Additional Details (if any) */}
                                         <div className="topic-details mt-3">
                                           <p>{topic.details}</p>
                                         </div>
@@ -624,42 +663,55 @@ const isValid=numberOfQuestion > 0
                             </div>
                           ))
                         )}
-                      </div>
+                      </div> */}
                       <div className="training_cont unit-container p-4">
                         <div className="topic-section p-3 ">
                           <InputGroup size="sm" className="mb-3">
-                            <Form.Select aria-label="Default select example">
+                            <Form.Select
+                              aria-label="Default select example"
+                              onChange={handleChangeTrainigData}
+                              name="topic_id"
+                            >
                               <option>اختر الموضوع</option>
-                              <option value="1">One</option>
-                              <option value="2">Two</option>
-                              <option value="3">Three</option>
+                              {topics.map((topic) => (
+                                <option key={topic.id} value={topic.id}>
+                                  {topic.topic_name}
+                                </option>
+                              ))}
                             </Form.Select>
                             <InputGroup.Text id="inputGroup-sizing-sm">
                               عدد الاسئلة
                             </InputGroup.Text>
                             <Form.Control
+                              name="questionCount"
                               aria-label="Small"
                               aria-describedby="inputGroup-sizing-sm"
+                              onChange={handleChangeTrainigData}
                             />
-                            <Form.Select aria-label="Default select example">
+                            <Form.Select
+                              aria-label="Default select example"
+                              onChange={handleChangeTrainigData}
+                              name="questionType"
+                            >
                               <option>نوع الاسئلة</option>
-                              <option value="1">One</option>
-                              <option value="2">Two</option>
-                              <option value="3">Three</option>
+                              <option value="repeated">اسئلة مكررة </option>
+                              <option value="non_repeated">اسئلة جديدة</option>
                             </Form.Select>
                             <div className="d-flex">
-                                {/* <Link to={`/testbank/${topic.id}`}> */}
-                                  <button
-                                    className="show_video_btn mt-2"
-                                    style={{
-                                      backgroundColor: "#f8c36e",
-                                    }}
-                                  >
-                                    ابدا التدريب
-                                  </button>
-                                {/* </Link> */}
-                              </div>
+                              <button
+                                className="show_video_btn mt-2"
+                                style={{
+                                  backgroundColor: "#f8c36e",
+                                }}
+                                onClick={startTraining}
+                              >
+                                ابدا التدريب
+                              </button>
+                            </div>
                           </InputGroup>
+                          {message && (
+                            <Alert variant="danger">{message}</Alert>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -706,14 +758,14 @@ const isValid=numberOfQuestion > 0
                                 تنزيل <i className="fa-solid fa-download"></i>
                               </button>
                               {/* <Link to={`/explanation`}> */}
-                                <button
-                                  className="show_video_btn"
-                                  style={{
-                                    backgroundColor: "#f8c36e",
-                                  }}
-                                >
-                                  عرض <i className="fa-regular fa-eye"></i>
-                                </button>
+                              <button
+                                className="show_video_btn"
+                                style={{
+                                  backgroundColor: "#f8c36e",
+                                }}
+                              >
+                                عرض <i className="fa-regular fa-eye"></i>
+                              </button>
                               {/* </Link> */}
                             </div>
                           </div>
@@ -747,7 +799,9 @@ const isValid=numberOfQuestion > 0
                                   <Form.Control
                                     aria-label="Small"
                                     aria-describedby="inputGroup-sizing-sm"
-                                    onChange={(e)=>setNumberOfQuestion(e.target.value)}
+                                    onChange={(e) =>
+                                      setNumberOfQuestion(e.target.value)
+                                    }
                                     required
                                     min="1"
                                   />
@@ -758,7 +812,9 @@ const isValid=numberOfQuestion > 0
                           <div className="col-lg-6 col-md-6 col-sm-12">
                             <div className="d-flex justify-content-evenly">
                               <div className="d-flex ">
-                                <Link to={`/quiz/${courseId}/${numberOfQuestion}`}>
+                                <Link
+                                  to={`/quiz/${courseId}/${numberOfQuestion}`}
+                                >
                                   <button
                                     className="show_video_btn mt-2"
                                     style={{
@@ -772,11 +828,7 @@ const isValid=numberOfQuestion > 0
                               </div>
                             </div>
                           </div>
-                                {!isValid && (
-                                  <p>
-                                    يرجى اختيار عدد الاسئلة أكبر من 0
-                                  </p>
-                                )}
+                          {!isValid && <p>يرجى اختيار عدد الاسئلة أكبر من 0</p>}
                         </div>
                         {/* ))} */}
                       </div>

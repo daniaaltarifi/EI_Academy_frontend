@@ -137,7 +137,34 @@ function Quiz() {
   const [quizFinished, setQuizFinished] = useState(false);
   const [scoreData, setScoreData] = useState(null);
   const user_id = localStorage.getItem("id");
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [selectedAnswer, setSelectedAnswer] = useState([]);
+  const [dragDropAnswers, setDragDropAnswers] = useState([]);
+  const [text, setText] = useState("");
+
+  const handleDragStart = (event, answerText) => {
+    event.dataTransfer.setData("text", answerText);
+  };
+
+  const handleDrop = (event, dropZoneId) => {
+    event.preventDefault();
+    const answerText = event.dataTransfer.getData("text");
+
+    // Check if this drop zone already has an answer
+    setDragDropAnswers((prev) => {
+      const existingZone = prev.find((zone) => zone.id === dropZoneId);
+
+      if (existingZone) {
+        // If the zone already has an answer, update it
+        return prev.map((zone) =>
+          zone.id === dropZoneId ? { ...zone, answer: answerText } : zone
+        );
+      } else {
+        // Otherwise, add a new entry for the drop zone
+        return [...prev, { id: dropZoneId, answer: answerText }];
+      }
+    });
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -149,60 +176,58 @@ function Quiz() {
       } catch (error) {
         console.error(error);
       }
-
-      // const apiData = [
-      //   {
-      //     type: "radio",
-      //     question: "ما معنى ال SEO ؟",
-      //     options: [
-      //       "السيو هي معنا تحسين محركات البحث من أجل زيادة زوار الموقع",
-      //       "السيو هو مصطلح غير متعلق بتحسين المواقع",
-      //     ],
-      //   },
-      //   {
-      //     type: "text",
-      //     question: "ما معنى ال SEO ؟",
-      //   },
-      //   {
-      //     type: "dragdrop",
-      //     question:
-      //       "تعتبر ال ______________واحدة من اهم الادوات التي تساعد في تحسين نتائج البحث باستخدام _______________ كما أن لديها العديد من الميزات مثل: 1____________ 2___________",
-      //     blanks: [
-      //       { accept: "الادوات" },
-      //       { accept: "الكلمات المفتاحية" },
-      //       { accept: "الميزة الاولى" },
-      //       { accept: "الميزة الثانية" },
-      //     ],
-      //   },
-      // ];
-      // setQuestions(apiData);
     };
     fetchData();
   }, [testbankcourseid, numofques]);
-  const handleAnswerSelect = (answer_id) => {
-    setSelectedAnswer(answer_id);
+  const handleAnswerSelect = (answer_id, answer_text) => {
+    setSelectedAnswer((prev) => [
+      ...prev,
+      { id: answer_id, answer_text: answer_text },
+    ]);
   };
+
   const handleNext = async () => {
     // if (!selectedAnswer) {
     //   alert("Please select an answer before proceeding.");
     //   return;
     // }
+    let answersToPost = [];
+    // Check for the answer based on the question type
+    if (questions[currentQuestionIndex].question_type === "سحب وافلات") {
+      // Ensure dragDropAnswers are in the right format
+      answersToPost = dragDropAnswers.map((zone) => ({
+        id: zone.id,
+        answer_text: zone.answer,
+      }));
+    } else if (questions[currentQuestionIndex].question_type === "نص") {
+      // For text questions, send the final value of text (not intermediate)
+      answersToPost = [
+        { id: currentQuestionIndex + 1, answer_text: text }, // Only store the final answer
+      ];
+    } else {
+      answersToPost = selectedAnswer;
+    }
+
+    console.log("dragDropAnswers:", dragDropAnswers);
+
     try {
       const res = await axios.post(`${API_URL}/exams/createExam`, {
         user_id: user_id,
         question_id: questions[currentQuestionIndex].id,
-        answer_id: selectedAnswer,
+        answers: answersToPost,
       });
-      console.log("Sent:", {
-        question_id: questions[currentQuestionIndex].id,
-        answer_id: selectedAnswer,
-      });
+      // console.log("Sent:", {
+      //   question_id: questions[currentQuestionIndex].id,
+      //   answers: answersToPost,
+      // });
     } catch (error) {
       console.error(error);
     }
+
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setSelectedAnswer(null);
+      setSelectedAnswer([]);
+      setDragDropAnswers([]);
     } else {
       finishQuiz();
     }
@@ -214,35 +239,17 @@ function Quiz() {
     }
   };
 
-  const finishQuiz = () => {
-    const mockScoreData = {
-      user_id: 17,
-      totalQuestions: 6,
-      correctAnswers: 3,
-      incorrectAnswers: 3,
-      successRate: 50,
-      failRate: 50,
-      feedback: "Good effort! Focus more on weak areas.",
-      incorrectQuestions: [
-        {
-          question_id: 11,
-          user_answer: "العصر الحجري الحديث",
-          correct_answer: "وقوعه بين آسيا وإفريقيا وأوروبا",
-        },
-        {
-          question_id: 13,
-          user_answer: "مناخ الصحراء الحار",
-          correct_answer: "النبطية",
-        },
-        {
-          question_id: 13,
-          user_answer: "مناخ الصحراء الحار",
-          correct_answer: "النبطية",
-        },
-      ],
-    };
-    setScoreData(mockScoreData);
-    setQuizFinished(true);
+  const finishQuiz = async () => {
+    try {
+      const res = await axios.get(
+        `${API_URL}/exams/getUserHistorySummary/${user_id}`
+      );
+      setScoreData(res.data);
+      console.log("score", res.data);
+      setQuizFinished(true);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -261,47 +268,111 @@ function Quiz() {
                     type="radio"
                     name="quizOption"
                     className="ms-2"
-                    onChange={() => handleAnswerSelect(option.id)}
-                    checked={selectedAnswer === option.id}
+                    onChange={() =>
+                      handleAnswerSelect(option.id, option.answer_text)
+                    }
+                    checked={selectedAnswer.some(
+                      (answer) => answer.id === option.id
+                    )}
                   />
                   <span>{option.answer_text}</span>
                 </div>
               ))}
-
-            {questions[currentQuestionIndex].type === "نص" && (
-              <textarea rows={5} className="w-100" ></textarea>
+            {questions[currentQuestionIndex].question_type ===
+              "إجابات متعددة" &&
+              questions[currentQuestionIndex].Answers.map((option, index) => (
+                <div className="d-flex mb-3" key={index}>
+                  <Form.Check
+                    className="ms-2"
+                    onChange={() =>
+                      handleAnswerSelect(option.id, option.answer_text)
+                    }
+                    checked={selectedAnswer.some(
+                      (answer) => answer.id === option.id
+                    )}
+                  />
+                  <span>{option.answer_text}</span>
+                </div>
+              ))}
+            {questions[currentQuestionIndex].question_type === "نص" && (
+              <textarea
+                rows={5}
+                className="w-100"
+                onChange={(e) => setText(e.target.value)}
+              ></textarea>
             )}
 
-            {questions[currentQuestionIndex].type === "سحب وافلات" && (
-              <div
-                className="answers"
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "center",
-                }}
-              >
-                {questions[currentQuestionIndex].Answers.map((blank, index) => (
-                  <Draggable key={index}>
-                    <button
+            {questions[currentQuestionIndex].question_type === "سحب وافلات" && (
+              <div>
+                <h6>اسحب وافلت الإجابات في الأماكن الصحيحة</h6>
+
+                {/* Drop Zones - Render based on dragDropAnswers state */}
+                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                  {questions[currentQuestionIndex].Answers.map((_, index) => (
+                    <div
+                      key={index}
+                      className="drop-zone"
+                      onDragOver={(event) => event.preventDefault()}
+                      onDrop={(event) => handleDrop(event, `zone_${index}`)}
                       style={{
-                        backgroundColor: "#018abe",
-                        border: "none",
-                        borderRadius: "20px",
-                        padding: "5px",
-                        color: "#fff",
-                        marginLeft: "5px",
+                        width: "200px",
+                        height: "50px",
+                        border: "2px dashed #018abe",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: dragDropAnswers.find(
+                          (zone) => zone.id === `zone_${index}`
+                        )
+                          ? "#d4edda"
+                          : "#f8d7da",
                       }}
                     >
-                      {blank.accept}
-                    </button>
-                  </Draggable>
-                ))}
+                      {
+                        // Check if the answer has been dropped into this zone
+                        dragDropAnswers.find(
+                          (zone) => zone.id === `zone_${index}`
+                        )
+                          ? dragDropAnswers.find(
+                              (zone) => zone.id === `zone_${index}`
+                            ).answer
+                          : "اسحب الإجابة هنا"
+                      }
+                    </div>
+                  ))}
+                </div>
+
+                {/* Draggable Answers */}
+                <div
+                  style={{ display: "flex", gap: "10px", marginTop: "20px" }}
+                >
+                  {questions[currentQuestionIndex].Answers.map(
+                    (option, index) => (
+                      <div
+                        key={index}
+                        draggable
+                        onDragStart={(event) =>
+                          handleDragStart(event, option.answer_text)
+                        }
+                        style={{
+                          backgroundColor: "#018abe",
+                          padding: "10px",
+                          borderRadius: "10px",
+                          color: "#fff",
+                          cursor: "grab",
+                          userSelect: "none",
+                        }}
+                      >
+                        {option.answer_text}
+                      </div>
+                    )
+                  )}
+                </div>
               </div>
             )}
 
-            <div className="d-flex justify-content-between mt-4">
-              <button
+            <div className="d-flex justify-content-end mt-4">
+              {/* <button
                 onClick={handlePrev}
                 disabled={currentQuestionIndex === 0}
                 className="btn show_video_btn"
@@ -310,7 +381,7 @@ function Quiz() {
                 }}
               >
                 السابق
-              </button>
+              </button> */}
               <button onClick={handleNext} className="btn show_video_btn">
                 {currentQuestionIndex === questions.length - 1
                   ? "إنهاء الاختبار"
@@ -320,55 +391,60 @@ function Quiz() {
           </div>
         )
       ) : (
-        <div className="score-container text-center p-4">
-          <h2>🎉 نتيجتك النهائية! 🎉</h2>
-          <div className="score_result">
-            <h1 className="text_score">{scoreData.successRate}%</h1>
-          </div>
-          <div className="d-flex">
-            <div className="correct_wrong_answer">
-              <img
-                src={require("../assets/checked.png")}
-                alt="checked"
-                title="checked"
-              />
-              <hr />
-              <p>
-                {" "}
-                إجابات صحيحة: {scoreData.correctAnswers} /{" "}
-                {scoreData.totalQuestions}
-              </p>
+        <>
+          <div className="score-container text-center p-4">
+            <h2>🎉 نتيجتك النهائية! 🎉</h2>
+            <div className="score_result">
+              <h1 className="text_score">{scoreData.successRate}%</h1>
             </div>
-            <div className="correct_wrong_answer">
-              <img
-                src={require("../assets/no.png")}
-                alt="checked"
-                title="checked"
-              />
-              <hr />
-              <p> إجابات خاطئة: {scoreData.incorrectAnswers}</p>
+            <div className="d-flex">
+              <div className="correct_wrong_answer">
+                <img
+                  src={require("../assets/checked.png")}
+                  alt="checked"
+                  title="checked"
+                />
+                <hr />
+                <p>
+                  إجابات صحيحة: {scoreData.correctAnswers} /{" "}
+                  {scoreData.totalQuestions}
+                </p>
+              </div>
+              <div className="correct_wrong_answer">
+                <img
+                  src={require("../assets/no.png")}
+                  alt="checked"
+                  title="checked"
+                />
+                <hr />
+                <p> إجابات خاطئة: {scoreData.incorrectAnswers}</p>
+              </div>
             </div>
+            <h5> {scoreData.feedback.level}</h5>
+            <h5>
+              {" "}
+              {scoreData.feedback.icon}
+              {scoreData.feedback.message}
+            </h5>
+            <h5> {scoreData.feedback.recommendation}</h5>
           </div>
-
-          {/* <h3>
-            ✅ إجابات صحيحة: {scoreData.correctAnswers} /{" "}
-            {scoreData.totalQuestions}
-          </h3>
-          <h3>❌ إجابات خاطئة: {scoreData.incorrectAnswers}</h3> */}
-          {/* <h4>📊 نسبة النجاح: {scoreData.successRate}%</h4> */}
-          <h5>💡 {scoreData.feedback}</h5>
           <h4 style={{ marginTop: "20px", color: "red" }}>
             ❌ الأسئلة الخاطئة:
           </h4>
-          <ul>
-            {scoreData.incorrectQuestions.map((q, index) => (
-              <li key={index}>
-                ❌ <strong>إجابتك:</strong> {q.user_answer} | ✅{" "}
-                <strong>الصحيح:</strong> {q.correct_answer}
-              </li>
-            ))}
-          </ul>
-        </div>
+          {scoreData.incorrectQuestions.map((q, index) => (
+            <div>
+              <h5 style={{ color: "#018abe", marginBottom: "20px" }}>
+                {q.question_text}
+              </h5>
+              <div className={`d-flex mb-3 option incorrect `}>
+                <span>{q.user_answer}</span>
+              </div>
+              <div className="d-flex mb-3 option correct">
+                <span>{q.correct_answer}</span>
+              </div>
+            </div>
+          ))}
+        </>
       )}
     </div>
   );

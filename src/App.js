@@ -18,8 +18,8 @@ import QuestionDetails from "./Pages/QuestionDetails.js";
 import Explanation from "./Pages/Explanation.js";
 import Quiz from "./Pages/Quiz.js";
 import TestBank from "./Pages/TestBank.js";
- export const API_URL = "http://localhost:6060";
-// export const API_URL='https://backendba9ma.ba9maonline.com'
+//  export const API_URL = "http://localhost:6065";
+export const API_URL='https://eiacademybackend.kassel.icu'
 const CourseDetails = React.lazy(() => import("./Pages/CourseDetails.js"));
 const BlogDetails = React.lazy(() => import("./Pages/BlogDetails.js"));
 const CardPrice = React.lazy(() => import("./Pages/CardPrice.js"));
@@ -142,7 +142,7 @@ function App() {
             <Route path="/mycoursedetails/:id" element={<MyCourseDetail />} />
             <Route path="/questionbank" element={<QuestionBank />} />
             <Route path="/questiondetails/:id" element={<QuestionDetails />} />
-            <Route path="/testbank/:topic_id" element={<TestBank />} />
+            <Route path="/testbank/:topic_id/:number_of_questions/:question_type" element={<TestBank />} />
             <Route path="/explanation/:topic_id" element={<Explanation />} />
             <Route path="/quiz/:testbankcourseid/:numofques" element={<Quiz />} />
           </Routes>
