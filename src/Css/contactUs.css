@@ -18,6 +18,7 @@ height: 50px;
 .contact_info{
     font-size: 13px;
     padding-right: 1vh;
+    padding-top: 2vh;
     text-decoration: none;
     color: #000;
 }

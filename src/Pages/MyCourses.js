@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { UserContext } from "../UserContext";
 import { API_URL } from "../App";
+import courseimg from "../assets/course.webp";
 
 function MyCourses() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -15,24 +16,24 @@ function MyCourses() {
   const [department, setDepartment] = useState([]);
   const [selectedDepartment, setSelectedDepartment] = useState("");
 
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const response = await axios.get(
-          `${API_URL}/PaymentsCourse/getApprovedCoursesForUser/${userId}`
-        );
-        setCourses(response.data);
-        setSearchResults(response.data);
-        if (response.data.length > 0) {
-          setCourseId(response.data[0].course_id);
-        }
-      } catch (error) {
-        console.error("Error fetching approved courses:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchCourses = async () => {
+  //     try {
+  //       const response = await axios.get(
+  //         `${API_URL}/PaymentsCourse/getApprovedCoursesForUser/${userId}`
+  //       );
+  //       setCourses(response.data);
+  //       setSearchResults(response.data);
+  //       if (response.data.length > 0) {
+  //         setCourseId(response.data[0].course_id);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching approved courses:", error);
+  //     }
+  //   };
 
-    fetchCourses();
-  }, [userId]);
+  //   fetchCourses();
+  // }, [userId]);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -82,6 +83,9 @@ function MyCourses() {
 
         setCourses(coursesWithDetails);
         setSearchResults(coursesWithDetails);
+        if (coursesWithDetails.length > 0) {
+          setCourseId(coursesWithDetails[0].course_id);
+        }
       } catch (error) {
         console.error("Error fetching approved courses:", error);
       }
@@ -104,19 +108,16 @@ function MyCourses() {
 
     fetchDepartments();
   }, []);
-
   useEffect(() => {
     const filterCourses = () => {
-      let filteredCourses = courses;
+      let filteredCourses = [...courses]; // Ensure a fresh copy of courses
 
-      // Filter by search query
       if (searchQuery) {
         filteredCourses = filteredCourses.filter((course) =>
           course.subject_name.toLowerCase().includes(searchQuery.toLowerCase())
         );
       }
 
-      // Filter by selected department
       if (selectedDepartment) {
         filteredCourses = filteredCourses.filter(
           (course) => course.department_id === parseInt(selectedDepartment)
@@ -127,7 +128,31 @@ function MyCourses() {
     };
 
     filterCourses();
-  }, [searchQuery, selectedDepartment]);
+  }, [searchQuery, selectedDepartment, courses]); // Added `courses` dependency
+
+  // useEffect(() => {
+  //   const filterCourses = () => {
+  //     let filteredCourses = courses;
+
+  //     // Filter by search query
+  //     if (searchQuery) {
+  //       filteredCourses = filteredCourses.filter((course) =>
+  //         course.subject_name.toLowerCase().includes(searchQuery.toLowerCase())
+  //       );
+  //     }
+
+  //     // Filter by selected department
+  //     if (selectedDepartment) {
+  //       filteredCourses = filteredCourses.filter(
+  //         (course) => course.department_id === parseInt(selectedDepartment)
+  //       );
+  //     }
+
+  //     setSearchResults(filteredCourses);
+  //   };
+
+  //   filterCourses();
+  // }, [searchQuery, selectedDepartment]);
 
   const handleInputChange = (event) => {
     setSearchQuery(event.target.value);
@@ -136,7 +161,22 @@ function MyCourses() {
   const handleDepartment = (e) => {
     setSelectedDepartment(e.target.value);
   };
+  const [windowSize, setWindowSize] = useState(window.innerWidth);
+  if (typeof window !== "undefined") {
+    const observer = new ResizeObserver(() => {});
+    observer.observe(document.body);
+  }
+  
+  useEffect(() => {
+    let timeout;
+    const handleResize = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => setWindowSize(window.innerWidth), 200); // Debounce update
+    };
 
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   return (
     <>
       {/* background image */}
@@ -202,63 +242,120 @@ function MyCourses() {
       <div className="container">
         <div className="row d-flex flex-wrap justify-content-center align-items-center">
           {searchResults.map((course, index) => (
-            <div className="col-lg-4 col-md-6 col-sm-12" key={index}>
-              <Link
-                style={{ textDecoration: "none" }}
-                to={`/mycoursedetails/${course.course_id}`}
-              >
-                <div className="card card_cont">
-                  <img
-                    src={`https://res.cloudinary.com/dqimsdiht/${course.course?.img}`}
-                    className="card-img-top img-fluid card_img"
-                    alt={course.course?.subject_name}
-                    loading="lazy"
-                  />
-                  <div className="card-body">
-                    <div>
-                      <p className="card-text card_dep">
-                        {course.course?.Department?.title ||
-                          "No Department Available"}
-                      </p>
+            <>
+              {/* Render Course Card if course_id exists */}
+              {course.course_id !== null && (
+                <div className="col-lg-4 col-md-6 col-sm-12" key={index}>
+                  <Link
+                    style={{ textDecoration: "none" }}
+                    to={`/mycoursedetails/${course.course_id}`}
+                  >
+                    <div className="card card_cont">
+                      <img
+                        src={`https://res.cloudinary.com/dqimsdiht/${course.course?.img}`}
+                        className="card-img-top img-fluid card_img"
+                        alt={course.course?.subject_name}
+                        loading="lazy"
+                      />
+                      <div className="card-body">
+                        <div>
+                          <p className="card-text card_dep">
+                            {course.course?.Department?.title ||
+                              "No Department Available"}
+                          </p>
+                        </div>
+                        <div className="d-flex justify-content-between">
+                          <p className="course_title_card">
+                            {course.course?.subject_name}
+                          </p>
+                          <p className="teacher_name_card">
+                            {course.course?.teacher?.teacher_name}
+                          </p>
+                        </div>
+                        <hr style={{ marginTop: "1px" }} />
+                        <div className="d-flex justify-content-between">
+                          <i
+                            className="fa-solid fa-file card_icon"
+                            style={{ color: "#f8c36e" }}
+                          ></i>
+                          <p className="details_courses_card">
+                            {course.student_count} طالب
+                          </p>
+                          <i
+                            className="fa-solid fa-graduation-cap card_icon"
+                            style={{ color: "#f8c36e" }}
+                          ></i>
+                          <p className="details_courses_card">
+                            {course.lesson_count} درس
+                          </p>
+                          <i
+                            className="fa-solid fa-clock card_icon"
+                            style={{ color: "#f8c36e" }}
+                          ></i>
+                          <p className="details_courses_card">
+                            {new Date(
+                              course.course?.created_at
+                            ).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="d-flex justify-content-between">
-                      <p className="course_title_card">
-                        {course.course?.subject_name}
-                      </p>
-                      <p className="teacher_name_card">
-                        {course.course?.teacher?.teacher_name}
-                      </p>
-                    </div>
-                    <hr style={{ marginTop: "1px" }} />
-                    <div className="d-flex justify-content-between">
-                      <i
-                        className="fa-solid fa-file card_icon"
-                        style={{ color: "#f8c36e" }}
-                      ></i>
-                      <p className="details_courses_card">
-                        {course.student_count} طالب
-                      </p>
-                      <i
-                        className="fa-solid fa-graduation-cap card_icon"
-                        style={{ color: "#f8c36e" }}
-                      ></i>{" "}
-                      <p className="details_courses_card">
-                        {course.lesson_count} درس
-                      </p>
-                      <i
-                        className="fa-solid fa-clock card_icon"
-                        style={{ color: "#f8c36e" }}
-                      ></i>{" "}
-                      <p className="details_courses_card">
-                        {new Date(
-                          course.course?.created_at
-                        ).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
+                  </Link>
                 </div>
-              </Link>
-            </div>
+              )}
+
+              {/* Render Test Bank Card if TestBank.id exists */}
+              {course.testBank_id !== null && (
+                <div className="col-lg-4 col-md-6 col-sm-12" key={index}>
+                  <Link
+                    style={{ textDecoration: "none" }}
+                    to={`/questiondetails/${course.TestBank?.id}`}
+                  >
+                    <div className="card card_cont">
+                      <img
+                        src={courseimg} // Assuming courseimg is a default image for test bank cards
+                        className="card-img-top img-fluid card_img"
+                        alt={course.TestBank?.testBankCourse_name}
+                        loading="lazy"
+                      />
+                      <div className="card-body">
+                        <div>
+                          <p className="card-text card_dep">
+                            {course.TestBank?.semester ||
+                              "No semester Available"}
+                          </p>
+                        </div>
+                        <div className="d-flex justify-content-between">
+                          <p className="course_title_card">
+                            {course.TestBank?.testBankCourse_name}
+                          </p>
+                        </div>
+                        <hr style={{ marginTop: "1px" }} />
+                        <div className="d-flex justify-content-between">
+                          <i
+                            className="fa-solid fa-file card_icon"
+                            style={{ color: "#f8c36e" }}
+                          ></i>
+                          <p className="details_courses_card">بنك اسئلة</p>
+                          <i
+                            className="fa-solid fa-graduation-cap card_icon"
+                            style={{ color: "#f8c36e" }}
+                          ></i>
+                          <p className="details_courses_card">
+                            عدد المواضيع:{" "}
+                            {course.TestBank?.Units?.reduce(
+                              (total, unit) =>
+                                total + (unit.Topics?.length || 0),
+                              0
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              )}
+            </>
           ))}
         </div>
       </div>

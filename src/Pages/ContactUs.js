@@ -79,7 +79,7 @@ useEffect(() => {
                       />
                     </div>
                     <div>
-                      <p className="contact_info">رقم الهاتف</p>
+                      {/* <p className="contact_info">رقم الهاتف</p> */}
                       <p className="contact_info">{contact.phone}</p>
                     </div>
                   </div>
@@ -95,8 +95,8 @@ useEffect(() => {
                         loading="lazy"  
                       />
                     </div>
-                    <div>
-                      <p className="contact_info">الواتساب</p>
+                    <div className="contact_info">
+                      {/* <p className="contact_info">الواتساب</p> */}
                       <a href={contact.whatsup} target ="blank"className="contact_info">بصمة واتساب</a>
                     </div>
                   </div>
@@ -111,14 +111,14 @@ useEffect(() => {
                         loading="lazy"
                       />
                     </div>
-                    <div>
-                      <p className="contact_info">الفيسبوك</p>
+                    <div className="contact_info">
+                      {/* <p className="contact_info">الفيسبوك</p> */}
                       <a href={contact.facebook} target ="blank"className="contact_info">بصمة اونلاين</a>
                     </div>
                   </div>
                 </div>
                 <div className="col-lg-6 col-md-6 col-sm-12 d-flex justify-content-center email_cont">
-                  <div className="d-flex ">
+                  <div className="d-flex justify-content-center align-items-center">
                     <div className="icon_cont_contact">
                       <img
                         src={require("../assets/email.png")}
@@ -128,7 +128,7 @@ useEffect(() => {
                       />
                     </div>
                     <div>
-                      <p className="contact_info">الايميل</p>
+                      {/* <p className="contact_info">الايميل</p> */}
                       <p className="contact_info">{contact.email}</p>
                     </div>
                   </div>

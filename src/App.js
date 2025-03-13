@@ -18,7 +18,7 @@ import QuestionDetails from "./Pages/QuestionDetails.js";
 import Explanation from "./Pages/Explanation.js";
 import Quiz from "./Pages/Quiz.js";
 import TestBank from "./Pages/TestBank.js";
-//  export const API_URL = "http://localhost:6065";
+//  export const API_URL = "http://localhost:6067";
 export const API_URL='https://eiacademybackend.kassel.icu'
 const CourseDetails = React.lazy(() => import("./Pages/CourseDetails.js"));
 const BlogDetails = React.lazy(() => import("./Pages/BlogDetails.js"));

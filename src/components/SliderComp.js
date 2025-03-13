@@ -89,13 +89,10 @@ function SliderComp() {
                     </div>
                   )}{" "}
                   <h1 className="title_of_slidercomp">
-                    {/* {slide.title} */}
-                    ادرس معنا
+                    {slide.title}
                     </h1>
                   <p className="paragraph_slider">
-                    {/* {slide.descr} */}
-                    تشمل مجموعة متنوعة من الدورات الأكاديمية المتاحة على منصتنا الإلكترونية. اختر البطاقة المناسبة لك وابدأ رحلتك التعليمية اليوم مع بصمة، حيث الجودة والتعلم بأسعار تناسب الجميع 
-
+                    {slide.descr}
                     </p>
                   <button 
     className={`btn btn-s purple_btn ${!slide.btn_name ? 'hidden_btn' : ''}`} 

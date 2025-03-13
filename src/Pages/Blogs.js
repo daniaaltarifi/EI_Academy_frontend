@@ -162,13 +162,11 @@ function Blogs() {
       {dynamicBlog.map((dyn) => (
         <div className="header_blog" key={dyn.id}>
           <p className="title_header_blog">
-            {/* {dyn.title} */}
-            المدونة
+            {dyn.title}
             </p>
           <div className="paragraph_cont">
             <p className="paragraph_header_blog">
-              {/* {dyn.descr} */}
-               تقدم محتوى تعليمي مميز وشامل، تهدف لتطوير مهاراتك الأكاديمية والشخصية.
+              {dyn.descr}
               </p>
           </div>
         </div>
@@ -178,59 +176,6 @@ function Blogs() {
         <div className="container ">
           <div className="row ">
             <div className="col-lg-8 col-md-12 col-sm-12 col_blog">
-              {/* search */}
-              {/* <div className="row">
-                <div className="col-lg-7 col-md-12 col-sm-12">
-                  <h1 className="title_blog">جميع المقالات</h1>
-                </div>
-                <div className="col-lg-5 col-md-12 col-sm-12">
-                  <div className="navbar__search">
-                    <span>
-                      <i
-                        className="fa-solid fa-magnifying-glass fa-sm"
-                        style={{ color: "#833988" }}
-                      ></i>{" "}
-                    </span>
-                    <input
-                      type="text"
-                      placeholder="ابحث عن موضوع"
-                      value={searchQuery}
-                      className="search_blog"
-                      onChange={handleInputChange}
-                    />
-                    <a
-                      className="btn btn-s purple_btn search_btn_blog"
-                      onChange={handleInputChange}
-                    >
-                      بحث{" "}
-                    </a>
-                    {searchQuery && (
-                      <ul className="search_dropdown">
-                        {searchResults.length > 0 ? (
-                          searchResults.map((blog) => (
-                            <li
-                              key={blog.id}
-                              onClick={() => {
-                                navigate(`/blogdetails/${blog.id}`);
-                                window.scrollTo(0, 0);
-                              }}
-                            >
-                              <img
-                                src={`https://res.cloudinary.com/dqimsdiht/${blog.img}`}
-                                alt={blog.title}
-                                loading="lazy"
-                              />
-                              {blog.title}
-                            </li>
-                          ))
-                        ) : (
-                          <li>No blogs found.</li>
-                        )}
-                      </ul>
-                    )}
-                  </div>
-                </div>
-              </div> */}
               {/* search */}
               <div className="row">
                 <div className="col-lg-7 col-md-12 col-sm-12">

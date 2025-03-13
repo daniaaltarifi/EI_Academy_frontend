@@ -61,8 +61,7 @@ function WhoWeAre() {
             <div className="col-lg-4 col-md-12 col-sm-12 p-1" key={who.id}>
               <div className="d-flex">
                 <p className="description_of_steps_who">
-                  {/* {who.title} */}
-                  نسعى لأن نكون المنصة التعليمية الرائدة، بتقديم تعليم إلكتروني متميز ومصادر موثوقة تسهم في نجاحك
+                  {who.title}
 
 
                    </p>
@@ -103,8 +102,7 @@ function WhoWeAre() {
         basmatrainig.map((item) => (
           <PurpleBox
             key={item.id}
-            // title={item.title}
-            title={" دورات أكاديمية الذكاء التربوي  "}
+            title={item.title}
             description={item.descr}
             link="/courses"
           />

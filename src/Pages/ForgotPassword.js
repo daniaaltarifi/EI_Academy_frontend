@@ -39,8 +39,8 @@ const ForgotPassword = () => {
                 <div className="hello_logo_auth_cont">
                   <p className="hi_auth">هل نسيت كلمه المرور؟</p>
                   <img
-                    src={require("../assets/ba9ma2.webp")}
-                    alt="ba9ma logo"
+                    src={require("../assets/logo-no-background.png")}
+                    alt="logo-no-background.png logo"
                     className="img-fluid logo_auth"
                     loading="lazy"
                   />

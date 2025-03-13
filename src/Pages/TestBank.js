@@ -337,7 +337,7 @@ function TestBank() {
           <div className="score_result">
             <h1 className="text_score">{scoreData.successRate}%</h1>
           </div>
-          <div className="d-flex">
+          <div className="d-flex flex-wrap">
             <div className="correct_wrong_answer">
               <img
                 src={require("../assets/checked.png")}

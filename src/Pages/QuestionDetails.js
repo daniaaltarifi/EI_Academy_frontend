@@ -24,9 +24,9 @@ import { Alert } from "react-bootstrap";
 function QuestionDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [courseDetails, setCourseDetails] = useState([]);
+  const [testBankDetails, setTestBankDetails] = useState([]);
   const [videosData, setVideosData] = useState([]);
-  const [courseId, setcourseId] = useState(null);
+  const [testbankId, settestbankId] = useState(null);
   const [show, setShow] = useState(false); // State for controlling modal visibility
   const { user } = useContext(UserContext);
   const { userId } = user;
@@ -62,7 +62,7 @@ function QuestionDetails() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    fetchCourseDetails();
+    fetchTestBankDetails();
     fetchTopicByTestbankId();
   }, []);
 
@@ -71,13 +71,13 @@ function QuestionDetails() {
     setExpandedItemId(expandedItemId === itemId ? null : itemId);
   };
 
-  const fetchCourseDetails = async () => {
+  const fetchTestBankDetails = async () => {
     try {
       const response = await fetch(`${API_URL}/testbank/gettestbank/${id}`);
       const data = await response.json();
-      setCourseDetails(data);
+      setTestBankDetails(data);
       if (data && data[0]) {
-        setcourseId(data[0].id);
+        settestbankId(data[0].id);
       }
     } catch (error) {
       console.error("Error fetching course details:", error);
@@ -112,14 +112,15 @@ function QuestionDetails() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ coupon_code: couponCode, course_id: courseId }),
+        body: JSON.stringify({ coupon_code: couponCode, testBank_id: testbankId }),
       });
+
       const data = await response.json();
       if (!response.ok) {
         return data.error || "Invalid coupon code";
       }
       // Check if the coupon type is not 'course'
-      if (data.couponType !== "course") {
+      if (data.couponType !== "testBank") {
         return "رمز الكوبون غير صالح"; // Return the error message
       }
       return ""; // No error
@@ -176,7 +177,7 @@ function QuestionDetails() {
         address: address,
         phone: phone,
         coupon_code: couponCode,
-        course_id: courseId,
+        testBank_id: testbankId,
         user_id: userId,
       });
       setMessage("Request was successful!");
@@ -221,25 +222,25 @@ function QuestionDetails() {
       }
     };
 
-    if (courseId) {
+    if (testbankId) {
       fetchCourseUsers();
     }
-  }, [courseId]);
+  }, [testbankId]);
 
   // Determine if the user is approved
   useEffect(() => {
-    if (course_users.length > 0 && userId && courseId) {
+    if (course_users.length > 0 && userId && testbankId) {
       // Check if the user is approved for the current course
 
       const user_courses = course_users.find(
         (user) =>
           user.payment_status === "approved" &&
           user.user_id == userId &&
-          user.course_id === courseId
+          user.testBank_id === testbankId
       );
       setApprovedUser(user_courses);
     }
-  }, [course_users, userId, courseId]); // Include `course` in dependency array if `course.expiration_date` is used
+  }, [course_users, userId, testbankId]); // Include `course` in dependency array if `course.expiration_date` is used
 
   const [showPopupVideo, setShowPopupVideo] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
@@ -253,7 +254,6 @@ function QuestionDetails() {
       ...prev,
       [name]: value,
     }));
-    console.log("training data", trainingData);
   };
   const startTraining = () => {
     if (
@@ -261,11 +261,9 @@ function QuestionDetails() {
       !trainingData.questionCount ||
       !trainingData.questionType
     ) {
-      // alert("يرجى إدخال جميع البيانات");
       setMessage('يرجى إدخال جميع البيانات')
       return;
     }
-
     navigate(
       `/testbank/${trainingData.topic_id}/${trainingData.questionCount}/${trainingData.questionType}`
     );
@@ -273,7 +271,7 @@ function QuestionDetails() {
   return (
     <>
       {/* header of course details */}
-      {courseDetails.map((course) => (
+      {testBankDetails.map((course) => (
         <div
           className="container text-center cont_course_details"
           key={course.id}
@@ -281,7 +279,7 @@ function QuestionDetails() {
           <div className="row ">
             <div className="col-lg-6 col-md-6 col-sm-12 d-flex justify-content-center">
               <img
-                src={courseimg}
+                src={course.image}
                 alt="coursedetails"
                 className="img-fluid img_coursedetails"
                 loading="lazy"
@@ -333,84 +331,45 @@ function QuestionDetails() {
               {/* <Video/> */}
 
               {/* {videosData.length > 0 && ( */}
-              <div className="video_cont">
-                <div className="video_wrapper">
-                  <div>
-                    <video
-                      controls
-                      controlsList="nodownload"
-                      className="video_play"
-                      preload="metadata"
-                    >
-                      <source
-                        src={defaultvideo} // Assuming first video is default
-                        type="video/mp4"
-                      />
-                      Your browser does not support the video tag.
-                    </video>
-                    {/* {approvedUser ? (
-                        <>
-                          <div className="d-flex justify-content-center">
-                            <div>
-                              <h2 className="title_after_purchase">
-                                {videosData[0].subject_name}
-                              </h2>
-                              <h3 className="teachar_after_purchase">
-                                {videosData[0].course.teacher.teacher_name}
-                              </h3>
-                            </div>
-                          </div>
-                          <div className="d-flex justify-content-center">
-                            <Link
-                              target="blankk"
-                              to={`https://res.cloudinary.com/dqimsdiht/image/upload/v1736931832/${videosData[0].course.file_book}`}
-                            >
-                              <button
-                                style={{
-                                  backgroundColor: "#833988",
-                                  border: "none",
-                                  borderRadius: "25px",
-                                  color: "#fff",
-                                  fontSize: "12px",
-                                  height: "35px",
-                                }}
-                                className="px-3"
-                              >
-                                {" "}
-                                <i
-                                  className="fa-solid fa-download px-2"
-                                  style={{ color: "#ffffff" }}
-                                ></i>
-                                تحميل
-                              </button>
-                            </Link>
-                          </div>
-                        </>
-                      ) : ( */}
-                    <div>
-                      <div className="d-flex justify-content-center">
-                        <p className="after_price_coursedetails">
-                          {/* {videosData[0].course.after_offer} دينار */}
-                          75 دينار
-                        </p>
-                        <p className="before_price_coursedetails">
-                          {/* {videosData[0].course.before_offer} دينار */}
-                          100 دينار
-                        </p>
-                      </div>
-                      <button
-                        className="purchase_now_coursedetails"
-                        onClick={handleShow}
-                      >
-                        شراء الان
-                      </button>
-                    </div>
-                    {/* )} */}
+              {testBankDetails.map((testbank) => (
+  <div className="video_cont" key={testbank.id}>
+    <div className="video_wrapper">
+      <div>
+        <video
+          controls
+          controlsList="nodownload"
+          className="video_play"
+          preload="metadata"
+        >
+          <source src={testbank.video} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+
+        {approvedUser ? (
+          <div className="d-flex justify-content-center">
+            <div>
+              <h2 className="title_after_purchase">
+                {testbank.testBankCourse_name}
+              </h2>
+              <h2 className="title_after_purchase">{testbank.semester}</h2>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <div className="d-flex justify-content-center">
+              <p className="after_price_coursedetails">{testbank.after_price}JD</p>
+              <p className="before_price_coursedetails">{testbank.before_price}JD</p>
+            </div>
+            <button className="purchase_now_coursedetails" onClick={handleShow}>
+              شراء الان
+            </button>
+          </div>
+        )}
 
                     {/* Modal */}
                     <Modal show={show} onHide={handleClose} dir="rtl">
                       <Modal.Title className="modal_title">
-                        شراء مادة
+                        شراء بنك اسئلة
                       </Modal.Title>
                       <Modal.Body>
                         <Form id="buyDepartmentForm">
@@ -476,7 +435,7 @@ function QuestionDetails() {
                               رقم الهاتف
                             </Form.Label>
                             <Form.Control
-                              type="text"
+                              type="number"
                               className={`input_filed_modal ${
                                 phoneError ? "border-danger" : ""
                               }`}
@@ -527,11 +486,12 @@ function QuestionDetails() {
                   </div>
                 </div>
               </div>
-              {/* )} */}
+))}
+
 
               {/*End video  */}
             </div>
-            {courseDetails.map((course) => (
+            {testBankDetails.map((course) => (
               <div
                 className="col-lg-7 col-md-12 col-sm-12 col_tabs_coursedetails"
                 key={course.id}
@@ -540,10 +500,10 @@ function QuestionDetails() {
                   <Tab title="عن المادة">
                     <div className="description_coursedetails">
                       <ReadMoreReact
-                        // text={course.descr}
-                        text={
-                          "عصرنا الرقمي، تحولت التكنولوجيا إلى عنصر أساسي في حياتنا اليومية، ومعها، ظهر التعليم عن بُعد كوسيلة مثالية لتكميل النظام التعليمي التقليدي. هذه الطريقة الجديدة تمكن الطلاب من فهم المفاهيم المعقدة بسهولة أكبر"
-                        }
+                        text={course.description}
+                        // text={
+                        //   "عصرنا الرقمي، تحولت التكنولوجيا إلى عنصر أساسي في حياتنا اليومية، ومعها، ظهر التعليم عن بُعد كوسيلة مثالية لتكميل النظام التعليمي التقليدي. هذه الطريقة الجديدة تمكن الطلاب من فهم المفاهيم المعقدة بسهولة أكبر"
+                        // }
                         min={200}
                         ideal={300}
                         max={500}
@@ -574,7 +534,7 @@ function QuestionDetails() {
                       </button>
                     </div>
                   </Tab>
-                  {/* {approvedUser ? ( */}
+                  {approvedUser ? (
                   <Tab title="تدريبات">
                     <div>
                       <p className="description_coursedetails">
@@ -716,13 +676,13 @@ function QuestionDetails() {
                       </div>
                     </div>
                   </Tab>
-                  {/* ) : (
+                   ) : (
                     <p>
                      
                     </p>
-                  )} */}
+                  )} 
 
-                  {/* {approvedUser ? ( */}
+                  {approvedUser ? (
                   <Tab title=" دوسيات ودفاتر ">
                     <div>
                       <div className="container text-center">
@@ -775,12 +735,12 @@ function QuestionDetails() {
                       </div>
                     </div>
                   </Tab>
-                  {/* ) : (
+                   ) : (
                     <p>
                    
                     </p>
-                  )} */}
-                  {/* {approvedUser ? ( */}
+                  )} 
+                  {approvedUser ? (
                   <Tab title="اختبارات محوسبة">
                     <div>
                       <div className="container text-center">
@@ -813,7 +773,7 @@ function QuestionDetails() {
                             <div className="d-flex justify-content-evenly">
                               <div className="d-flex ">
                                 <Link
-                                  to={`/quiz/${courseId}/${numberOfQuestion}`}
+                                  to={`/quiz/${testbankId}/${numberOfQuestion}`}
                                 >
                                   <button
                                     className="show_video_btn mt-2"
@@ -834,11 +794,11 @@ function QuestionDetails() {
                       </div>
                     </div>
                   </Tab>
-                  {/* ) : (
+                 ) : (
                     <p>
                     
                     </p>
-                  )} */}
+                  )} 
                 </Tabs>
               </div>
             ))}

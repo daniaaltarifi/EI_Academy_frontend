@@ -66,8 +66,7 @@ function Home() {
           <div className="row" key={abou.id}>
             <div className="col-lg-5 col-md-6 col-sm-12">
               <h2 className="about_title">
-                {/* {abou.title} */}
-                أكاديمية الذكاء التربوي
+                {abou.title}
                 </h2>
               <p className="p_about">{abou.descr}</p>
             </div>
@@ -96,8 +95,7 @@ function Home() {
         basmatrainig.map((item) => (
           <PurpleBox
             key={item.id}
-            // title={item.title}
-            title={"دورات  أكاديمية الذكاء التربوي"}
+            title={item.title}
             description={item.descr}
             link="/courses"
           />

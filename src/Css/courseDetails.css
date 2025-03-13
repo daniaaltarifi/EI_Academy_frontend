@@ -101,10 +101,7 @@ border-radius: 20px;
   }
   
 
-  .video-overlay{
-    background-image: url('../assets/ba9ma2.webp');
-  }
- 
+
   .video_cont {
     width: 100%;
     height: 450px; /* You can adjust this as needed */
@@ -150,7 +147,7 @@ border-radius: 20px;
     border: none;
   }
   .purchase_now_coursedetails:hover{
-    background-color: #a767ac;
+    background-color: #f8c36e;
     color: #fff;
   }
 .title_after_purchase{

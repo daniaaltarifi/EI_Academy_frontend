@@ -31,19 +31,8 @@ function MyCourseDetail() {
   // const [student_teacherCount, setstudent_teacherCount] = useState(0);
   const [courseId, setcourseId] = useState(null);
   const [show, setShow] = useState(false); // State for controlling modal visibility
-  const { user, logout } = useContext(UserContext);
-  const { isLoggedIn, userName, userId, img } = user;
-  const [studentName, setStudentName] = useState("");
-  const [email, setEmail] = useState("");
-  const [address, setAddress] = useState("");
-  const [phone, setPhone] = useState("");
-  const [couponCode, setCouponCode] = useState("");
-  const [message, setMessage] = useState("");
-  const [couponError, setCouponError] = useState("");
-  const [studentNameError, setStudentNameError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [addressError, setAddressError] = useState("");
-  const [phoneError, setPhoneError] = useState("");
+  const { user } = useContext(UserContext);
+  const { userId } = user;
   const [showLoginPopup, setShowLoginPopup] = useState(false); // State for controlling MiniPopUpLogin visibility
   const [ShowPopupConf, setShowPopupConf] = useState(false);
   const [smShow, setSmShow] = useState(false);
@@ -357,113 +346,8 @@ function MyCourseDetail() {
     setShowPopupConf(false);
   };
 
-  const validateCouponCode = async (code) => {
-    try {
-      const response = await fetch(`${API_URL}/PaymentsCourse/validate`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ coupon_code: couponCode, course_id: courseId }),
-      });
 
-      const data = await response.json();
 
-      if (!response.ok) {
-        return data.error || "Invalid coupon code";
-      }
-
-      // Check if the coupon type is not 'course'
-      if (data.couponType !== "course") {
-        return "رمز الكوبون غير صالح"; // Return the error message
-      }
-
-      return ""; // No error
-    } catch (error) {
-      console.error("Error checking coupon code:", error);
-      return "Invalid coupon code";
-    }
-  };
-
-  const handleSubmitPay = async (event) => {
-    event.preventDefault();
-
-    // Validate all fields
-    const errors = {};
-
-    if (!studentName) errors.studentName = "اسم الطالب مطلوب";
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-      errors.email = "البريد الإلكتروني غير صحيح";
-    if (!address) errors.address = "مكان السكن مطلوب";
-    if (!phone || !/^\d+$/.test(phone)) errors.phone = "رقم الهاتف غير صحيح";
-
-    // Custom validation for coupon code
-    const couponError = await validateCouponCode(couponCode); // Await the result of validateCouponCode
-    if (!couponCode || couponError) {
-      errors.couponCode = couponError || "رقم الكوبون غير صالح";
-    }
-    // Set errors and return if any
-    setStudentNameError(errors.studentName || "");
-    setEmailError(errors.email || "");
-    setAddressError(errors.address || "");
-    setPhoneError(errors.phone || "");
-
-    setCouponError(errors.couponCode || "");
-
-    if (Object.keys(errors).length > 0) {
-      return;
-    }
-    setCouponError("");
-    setStudentNameError("");
-    setEmailError("");
-    setAddressError("");
-    setPhoneError("");
-    const userId = localStorage.getItem("id"); // Retrieve user_id from local storage
-
-    if (!userId) {
-      setMessage("User ID not found. Please log in.");
-      handleClose();
-      setShowLoginPopup(true);
-      return;
-    }
-    try {
-      const response = await axios.post(`${API_URL}/PaymentsCourse/courses`, {
-        student_name: studentName,
-        email: email,
-        address: address,
-        phone: phone,
-        coupon_code: couponCode,
-        course_id: courseId,
-        user_id: userId,
-      });
-      setMessage("Request was successful!");
-      handleClose();
-      setSmShow(true);
-      setShowPopupConf(true);
-      // Clear recorded courses
-      setStudentName("");
-      setEmail("");
-      setAddress("");
-      setAddress("");
-      setPhone("");
-      setCouponCode("");
-    } catch (error) {
-      console.error(
-        "Error submitting form:",
-        error.response ? error.response.data : error.message
-      );
-
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.error === "Invalid coupon code"
-      ) {
-        setCouponError("رقم الكوبون غير صالح");
-      } else {
-        setMessage("There was an error with your submission.");
-      }
-    }
-  };
 
   const handleShow = () => setShow(true);
   useEffect(() => {
@@ -631,7 +515,7 @@ function MyCourseDetail() {
                               >
                                 <button
                                   style={{
-                                    backgroundColor: "#833988",
+                                    backgroundColor: "#018abe",
                                     border: "none",
                                     borderRadius: "25px",
                                     color: "#fff",
@@ -652,144 +536,9 @@ function MyCourseDetail() {
                           </>
                         ) : (
                           <div>
-                            <div className="d-flex justify-content-center">
-                              <p className="after_price_coursedetails">
-                                {videosData[0].course.after_offer} دينار
-                              </p>
-                              <p className="before_price_coursedetails">
-                                {videosData[0].course.before_offer} دينار
-                              </p>
-                            </div>
-                            <button
-                              className="purchase_now_coursedetails"
-                              onClick={handleShow}
-                            >
-                              شراء الان
-                            </button>
+                           
                           </div>
                         )}
-
-                        {/* Modal */}
-                        <Modal show={show} onHide={handleClose} dir="rtl">
-                          <Modal.Title className="modal_title">
-                            شراء مادة
-                          </Modal.Title>
-                          <Modal.Body>
-                            <Form id="buyDepartmentForm">
-                              <Form.Group className="mb-3">
-                                <Form.Label className="text_field">
-                                  اسم الطالب
-                                </Form.Label>
-                                <Form.Control
-                                  type="text"
-                                  className={`input_filed_modal ${
-                                    studentNameError ? "border-danger" : ""
-                                  }`}
-                                  value={studentName}
-                                  onChange={(e) =>
-                                    setStudentName(e.target.value)
-                                  }
-                                  required
-                                />
-                                {studentNameError && (
-                                  <Form.Text className="text-danger">
-                                    {studentNameError}
-                                  </Form.Text>
-                                )}
-                              </Form.Group>
-                              <Form.Group className="mb-3">
-                                <Form.Label className="text_field text-center">
-                                  الأيميل
-                                </Form.Label>
-                                <Form.Control
-                                  type="email"
-                                  className={`input_filed_modal ${
-                                    emailError ? "border-danger" : ""
-                                  }`}
-                                  value={email}
-                                  onChange={(e) => setEmail(e.target.value)}
-                                  required
-                                />
-                                {emailError && (
-                                  <Form.Text className="text-danger">
-                                    {emailError}
-                                  </Form.Text>
-                                )}
-                              </Form.Group>
-                              <Form.Group className="mb-3">
-                                <Form.Label className="text_field text-center">
-                                  مكان السكن
-                                </Form.Label>
-                                <Form.Control
-                                  type="text"
-                                  className={`input_filed_modal ${
-                                    addressError ? "border-danger" : ""
-                                  }`}
-                                  value={address}
-                                  onChange={(e) => setAddress(e.target.value)}
-                                  required
-                                />
-                                {addressError && (
-                                  <Form.Text className="text-danger">
-                                    {addressError}
-                                  </Form.Text>
-                                )}
-                              </Form.Group>
-                              <Form.Group className="mb-3">
-                                <Form.Label className="text_field text-center">
-                                  رقم الهاتف
-                                </Form.Label>
-                                <Form.Control
-                                  type="text"
-                                  className={`input_filed_modal ${
-                                    phoneError ? "border-danger" : ""
-                                  }`}
-                                  value={phone}
-                                  onChange={(e) => setPhone(e.target.value)}
-                                  required
-                                />
-                                {phoneError && (
-                                  <Form.Text className="text-danger">
-                                    {phoneError}
-                                  </Form.Text>
-                                )}
-                              </Form.Group>
-
-                              <Form.Group className="mb-3">
-                                <Form.Label className="text_field text-center">
-                                  الكوبون
-                                </Form.Label>
-                                <Form.Control
-                                  type="text"
-                                  className={`input_filed_modal ${
-                                    couponError ? "border-danger" : ""
-                                  }`}
-                                  value={couponCode}
-                                  onChange={(e) =>
-                                    setCouponCode(e.target.value)
-                                  }
-                                  required
-                                />
-                                {couponError && (
-                                  <Form.Text className="text-danger">
-                                    {couponError}
-                                  </Form.Text>
-                                )}
-                              </Form.Group>
-                            </Form>
-                          </Modal.Body>
-                          <Modal.Footer>
-                            <Button
-                              type="submit"
-                              onClick={handleSubmitPay}
-                              form="buyDepartmentForm"
-                              className="buy_department_btn"
-                            >
-                              شراء الآن
-                            </Button>
-                          </Modal.Footer>
-                        </Modal>
-                        {/* End Modal */}
                       </div>
                     ) : (
                       // Render selected video

@@ -135,13 +135,11 @@ function LandingPage() {
                 </div>
                 <div className="col-lg-10 col-md-12 col-sm-12">
                   <h5 className="h_box_slider">
-                    {/* {box.title} */}
-                    خطة دراسية متكاملة
+                    {box.title}
 
                   </h5>
                   <p className="p_box_slider">
-                    {/* {box.descr} */}
-                    نقدم خطة دراسية متكاملة تساعدك على تحقيق أهدافك الأكاديمية بكفاءة. تتضمن الخطة تنظيم الوقت، تحديد الأهداف، وتوفير الموارد التعليمية لكل مرحلة، مما يضمن تقدمك المستمر وتحقيق النجاح في دراستك
+                    {box.descr}
                     </p>
                 </div>
               </div>

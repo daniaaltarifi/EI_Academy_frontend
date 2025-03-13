@@ -546,7 +546,7 @@ function Courses() {
                   رقم الهاتف
                 </Form.Label>
                 <Form.Control
-                  type="text"
+                  type="number"
                   className={`input_filed_modal ${
                     phoneError ? "border-danger" : ""
                   }`}
