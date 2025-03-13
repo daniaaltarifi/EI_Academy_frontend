@@ -10,7 +10,7 @@ Ensure you have the following installed on your system:
 
 ## Installation
 1. Clone the repository:
-   git clone <repository-url>
+   git clone [https://github.com/daniaaltarifi/EI_Academy_frontend.git]
    
 2. Install dependencies:
    npm install
